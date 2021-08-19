@@ -13,6 +13,7 @@ const precache = {
 
 const appVersion = 2;
 
+let worker;
 let db;
 let channel;
 
@@ -151,6 +152,9 @@ function createChannel () {
         console.log('Cleaning request.')
         cleanDB();
         break;
+      case 'notificationsGranted':
+        console.log('Opening permanent notification.');
+        openPermanentNotification();
       default:
         console.error('Unknown message type.')
         break;
@@ -169,27 +173,51 @@ function newSubscription () {
   return subscription
 }
 
-function main () {
-
-  openDB();
-
-  channel = createChannel();
-
-  const subscription = newSubscription();
-  
-  console.log('Setting install event.')
-  self.addEventListener('install', ev => {
-    ev.waitUntil(
-      caches.open(precache.id)
-        .then(
-          cache => cache.addAll(precache.paths)
-        )
-        .then(
-          self.skipWaiting()
-        )
-    );
-  });
-
+function preloadCache (ev) {
+  ev.waitUntil(
+    caches.open(precache.id)
+      .then(
+        cache => cache.addAll(precache.paths)
+      )
+      .then(
+        self.skipWaiting()
+      )
+  );
 }
 
-main();
+function openPermanentNotification () {
+  if ( Notification.permission === 'granted' ) {
+      self.registration.showNotification(
+          'Mooli.me PoC', 
+          {
+              body: 'Here I\'m!',
+              icon: '/img/logo.png',
+              image: '/img/logo.png',
+              requireInteraction: true,
+              actions: [
+                  {
+                      action: 'close',
+                      title: 'Close',
+                  }
+              ]
+          }
+      )
+  }
+}
+
+function notificationsHandler (ev) {
+  if (ev.action === 'close') openPermanentNotification();
+}
+
+function main () {
+  openDB();
+  channel = createChannel();
+  const subscription = newSubscription();
+}
+
+
+self.addEventListener('install', preloadCache );
+
+self.addEventListener('activate', main);
+
+self.addEventListener('notificationclick', notificationsHandler)

@@ -97,7 +97,7 @@ function messageHandler (ev) {
             let timestamp = ev.data.obj.timestamp
             console.log('DB update notification:', ev.data.obj.string);
             getStoreData(db, 'times');
-            if ( timestamp % 5 === 0 && Notification.permission === 'granted') {
+            if ( timestamp % 15 === 0 && Notification.permission === 'granted') {
                 let notif = new Notification(
                     'New notification', 
                     {
@@ -119,12 +119,9 @@ function grantNotifications () {
     } else {
         if (Notification.permission !== 'granted') {
             alert('You must grant notifications for testing this PoC.');
-            Notification.requestPermission().then(function (p) {
-                if (p === 'granted') {
-                    // show notification here
-                    var notify = new Notification('Hi there!', {
-                        body: 'Thank you!',
-                    });
+            Notification.requestPermission().then(function (permission) {
+                if (permission === 'granted') {
+                    console.log('User grants notification permissions.');
                 } else {
                     console.log('User blocked notifications.');
                     alert('What\'s the matter with you?');
@@ -133,33 +130,39 @@ function grantNotifications () {
                 console.error(err);
             });
         }
+        if (Notification.permission === 'granted') channel.postMessage({type: 'notificationsGranted'});
     }
 }
 
 function main () {
     console.log('Starting...')
 
-    grantNotifications();
-
     if ('serviceWorker' in navigator) {
 
         try {
             navigator.serviceWorker.register('/service-worker.js');
+            /*
+            navigator.serviceWorker.ready.then((registration)=>{
+                openPermanentNotification(registration);
+            })
+            */
             console.log('Service worker registered.');
         } catch (error) {
             console.error(error)
             return
         }
 
-        channel = new BroadcastChannel('main');
-        channel.addEventListener('message', messageHandler);
-        console.log('Opened channel in window');
-
-        openDB();
-
         clicksDiv = document.querySelector('div#clicks');
         lastFiveUl = document.querySelector('ul#lastFive')
         button = document.querySelector('button');
+
+        channel = new BroadcastChannel('main');
+        channel.addEventListener('message', messageHandler);
+
+        openDB();
+
+        grantNotifications();
+
         button.addEventListener('click', () =>  channel.postMessage(clickMessage) );
 
     } else {
