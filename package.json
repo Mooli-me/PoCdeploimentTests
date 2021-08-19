@@ -1,0 +1,14 @@
+{
+  "name": "pwaboilerplate",
+  "version": "1.0.0",
+  "description": "Only a PWA boiler plate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "LGPL-2.1",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

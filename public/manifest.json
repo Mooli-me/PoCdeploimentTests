@@ -1,0 +1,17 @@
+{
+    "name": "PWA boiler plate",
+    "short_name": "PWA boiler plate",
+    "description": "Just a PWA boiler plate",
+    "icons": [
+        {
+            "src": "/img/logo.png",
+            "sizes": "any",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "start_url": "index.html",
+    "display": "standalone",
+    "theme_color": "#00ff00",
+    "background_color": "#ffff99"
+}
